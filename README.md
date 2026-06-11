@@ -46,11 +46,7 @@ Python 3.10 or later is recommended. No mandatory third-party package is require
 
 ### Recommended When Ollama Is Installed
 
-Install Ollama first if the `ollama` command is not available in your terminal. On Windows PowerShell, the official installer command is:
-
-```powershell
-irm https://ollama.com/install.ps1 | iex
-```
+Install Ollama first if the `ollama` command is not available in your terminal. Download it from the official Ollama page: https://ollama.com/download
 
 After installation, restart your terminal so the `ollama` command is available. Then start Ollama in one terminal if it is not already running:
 
