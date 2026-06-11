@@ -46,21 +46,29 @@ Python 3.10 or later is recommended. No mandatory third-party package is require
 
 ### Recommended When Ollama Is Installed
 
-Install Ollama first if the `ollama` command is not available in your terminal. Then start Ollama in one terminal if it is not already running:
+Install Ollama first if the `ollama` command is not available in your terminal. On Windows PowerShell, the official installer command is:
 
-```bash
+```powershell
+irm https://ollama.com/install.ps1 | iex
+```
+
+After installation, restart your terminal so the `ollama` command is available. Then start Ollama in one terminal if it is not already running:
+
+```powershell
 ollama serve
 ```
 
 Then open another terminal in the project folder:
 
-```bash
+```powershell
 cd 314833009_HW7_project
 ollama pull llama3.1
-set LLM_PROVIDER=ollama
-set OLLAMA_MODEL=llama3.1
+$env:LLM_PROVIDER="ollama"
+$env:OLLAMA_MODEL="llama3.1"
 python src/server.py
 ```
+
+If you are already inside `314833009_HW7_project`, skip the `cd 314833009_HW7_project` line.
 
 Open the app:
 
@@ -90,9 +98,9 @@ Install and run Ollama, then pull a chat model:
 
 ```bash
 ollama pull llama3.1
-set LLM_PROVIDER=ollama
-set OLLAMA_MODEL=llama3.1
-python -m src.server
+$env:LLM_PROVIDER="ollama"
+$env:OLLAMA_MODEL="llama3.1"
+python src/server.py
 ```
 
 ### OpenRouter
@@ -100,10 +108,10 @@ python -m src.server
 Set an OpenRouter API key and choose a model:
 
 ```bash
-set LLM_PROVIDER=openrouter
-set OPENROUTER_API_KEY=your_api_key
-set OPENROUTER_MODEL=opencode/big-pickle
-python -m src.server
+$env:LLM_PROVIDER="openrouter"
+$env:OPENROUTER_API_KEY="your_api_key"
+$env:OPENROUTER_MODEL="opencode/big-pickle"
+python src/server.py
 ```
 
 If neither provider is available, the app automatically uses an offline fallback so the demonstration can still run.
@@ -128,7 +136,7 @@ If neither provider is available, the app automatically uses an offline fallback
 
 ## How to Demo
 
-1. Start the local server with Ollama mode: `set LLM_PROVIDER=ollama`, `set OLLAMA_MODEL=llama3.1`, then `python src/server.py`.
+1. Start the local server. For portable fallback mode, run `python src/server.py`. For Ollama mode, set `$env:LLM_PROVIDER="ollama"` and `$env:OLLAMA_MODEL="llama3.1"` first.
 2. Enter a creative brief, for example: `台北夜市裡的未來感 AI 音樂祭，霓虹招牌、雨後反光與人群能量`.
 3. Click `Generate`.
 4. Watch the Flow Matching particles converge into a poster.
