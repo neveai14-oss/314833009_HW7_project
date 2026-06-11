@@ -1,0 +1,12 @@
+# Optional GPU mode dependencies.
+# Install PyTorch with the CUDA build that matches your GPU/driver first:
+# https://pytorch.org/get-started/locally/
+#
+# Example for CUDA 12.1:
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+
+diffusers>=0.30.0
+transformers>=4.44.0
+accelerate>=0.33.0
+safetensors>=0.4.4
+Pillow>=10.0.0

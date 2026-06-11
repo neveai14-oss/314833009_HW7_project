@@ -4,6 +4,7 @@ const promptInput = document.getElementById("prompt");
 const specEl = document.getElementById("spec");
 const statusEl = document.getElementById("status");
 const generateBtn = document.getElementById("generateBtn");
+const stableBtn = document.getElementById("stableBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 
 let animationId = null;
@@ -195,6 +196,45 @@ async function expandPrompt(prompt) {
   return response.json();
 }
 
+async function generateStableDiffusionImage(spec) {
+  const response = await fetch("/api/stable-diffusion", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      prompt: `${spec.prompt || promptInput.value}. poster design, cinematic composition, high quality, detailed, clean layout`,
+      negative_prompt: "low quality, blurry, watermark, unreadable text, distorted typography",
+      width: 512,
+      height: 768,
+      steps: 25,
+      guidance: 7.5,
+    }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Stable Diffusion request failed.");
+  return data;
+}
+
+function drawStableImage(data, spec) {
+  const image = new Image();
+  image.onload = () => {
+    ctx.fillStyle = "#020617";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "rgba(2, 6, 23, .64)";
+    ctx.fillRect(60, 80, 1080, 180);
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = '800 52px "Microsoft JhengHei", Inter, Arial, sans-serif';
+    ctx.textBaseline = "top";
+    wrapText(spec.title || "Stable Diffusion Poster", 92, 110, 980, 62);
+    ctx.fillStyle = "rgba(248,250,252,.78)";
+    ctx.font = "24px Inter, Arial, sans-serif";
+    ctx.fillText(`Stable Diffusion · ${data.model} · seed ${data.seed}`, 92, 220);
+    statusEl.textContent = "Done · Stable Diffusion image";
+  };
+  image.src = data.image;
+}
+
 async function generate() {
   statusEl.textContent = "Expanding prompt with LLM client...";
   generateBtn.disabled = true;
@@ -225,6 +265,23 @@ async function generate() {
   }
 }
 
+async function generateStable() {
+  statusEl.textContent = "Expanding prompt, then running Stable Diffusion...";
+  generateBtn.disabled = true;
+  stableBtn.disabled = true;
+  try {
+    const spec = await expandPrompt(promptInput.value);
+    specEl.textContent = JSON.stringify(visibleSpec(spec), null, 2);
+    const data = await generateStableDiffusionImage(spec);
+    drawStableImage(data, spec);
+  } catch (error) {
+    statusEl.textContent = `Stable Diffusion error: ${error.message}`;
+  } finally {
+    generateBtn.disabled = false;
+    stableBtn.disabled = false;
+  }
+}
+
 downloadBtn.addEventListener("click", () => {
   const link = document.createElement("a");
   link.download = "314833009_HW7_poster.png";
@@ -233,6 +290,7 @@ downloadBtn.addEventListener("click", () => {
 });
 
 generateBtn.addEventListener("click", generate);
+stableBtn.addEventListener("click", generateStable);
 
 const defaultSpec = {
   title: "台北夜市裡的未來感 AI 音樂祭 霓虹招牌",

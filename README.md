@@ -2,7 +2,7 @@
 
 Student ID: 314833009
 
-Prompt-to-Flow Poster Studio is a lightweight generative AI app that combines an LLM prompt-expansion workflow with a browser-based rectified-flow style poster generator. The user writes a creative brief, the backend expands it into a visual art direction, and the frontend animates particles from random noise into a structured poster composition.
+Prompt-to-Flow Poster Studio is a generative AI app that combines an LLM prompt-expansion workflow with two image-generation modes: a browser-based rectified-flow style poster generator and an optional GPU Stable Diffusion pipeline. The user writes a creative brief, the backend expands it into a visual art direction, and the app can either animate particles from random noise into a poster composition or generate a semantic image with Stable Diffusion.
 
 ## Features
 
@@ -10,6 +10,7 @@ Prompt-to-Flow Poster Studio is a lightweight generative AI app that combines an
 - Optional Ollama or OpenRouter integration with OpenAI-compatible style model access.
 - Offline fallback so the demo still runs without API keys or internet.
 - Canvas-based Flow Matching visualization: particles interpolate from noise distribution to target visual structure.
+- Optional Stable Diffusion text-to-image mode for GPU environments.
 - Interactive controls for flow steps, guidance strength, and particle count.
 - PNG export for demonstration material.
 
@@ -27,7 +28,9 @@ flowchart LR
     F --> G
     G --> H["Frontend Canvas app"]
     H --> I["Rectified-flow particle generation"]
+    H --> K["Stable Diffusion pipeline (optional GPU mode)"]
     I --> J["Poster PNG"]
+    K --> J
 ```
 
 ## Technical Requirements Mapping
@@ -36,7 +39,7 @@ flowchart LR
 | --- | --- |
 | Large Language Models | `src/llm_client.py` calls Ollama or OpenRouter and uses a structured prompt to request JSON art direction. |
 | Prompt Engineering | The system prompt forces compact JSON with title, palette, objects, mood, motion, and prompt fields. |
-| Diffusion / Flow Matching | `src/app.js` implements a rectified-flow inspired particle path from random noise to deterministic target points. |
+| Diffusion / Flow Matching | `src/app.js` implements a rectified-flow inspired particle path from random noise to deterministic target points. `src/diffusion_client.py` adds an optional Stable Diffusion text-to-image pipeline for GPU environments. |
 | App Interface | `src/index.html`, `src/styles.css`, and `src/app.js` provide a local interactive browser app. |
 | Agentic Workflow | `docs/WORKFLOW_LOG.md` records the planning, design, implementation, and packaging process. |
 
@@ -86,6 +89,29 @@ Module mode also works in environments that can resolve the `src` package:
 python -m src.server
 ```
 
+### Optional Stable Diffusion GPU Mode
+
+Install a CUDA-enabled PyTorch build that matches your GPU driver, then install the optional dependencies:
+
+```powershell
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+pip install -r requirements-stable-diffusion.txt
+```
+
+Start the app:
+
+```powershell
+python src/server.py
+```
+
+Open `http://127.0.0.1:8000`, enter a prompt, then click `Stable Diffusion`. The first run downloads the model specified by `SD_MODEL_ID`, so it may take several minutes.
+
+Default model:
+
+```powershell
+$env:SD_MODEL_ID="runwayml/stable-diffusion-v1-5"
+```
+
 ## Optional LLM Modes
 
 ### Ollama
@@ -118,8 +144,10 @@ If neither provider is available, the app automatically uses an offline fallback
 314833009_HW7_project/
   README.md
   requirements.txt
+  requirements-stable-diffusion.txt
   src/
     app.js
+    diffusion_client.py
     index.html
     llm_client.py
     server.py
@@ -135,9 +163,9 @@ If neither provider is available, the app automatically uses an offline fallback
 1. Start the local server. For portable fallback mode, run `python src/server.py`. For Ollama mode, set `$env:LLM_PROVIDER="ollama"` and `$env:OLLAMA_MODEL="llama3.1"` first.
 2. Enter a creative brief, for example: `台北夜市裡的未來感 AI 音樂祭，霓虹招牌、雨後反光與人群能量`.
 3. Click `Generate`.
-4. Watch the Flow Matching particles converge into a poster.
-5. Click `Download PNG` to export the generated result.
+4. Click `Generate` to watch the Flow Matching particles converge into a poster, or click `Stable Diffusion` to generate a semantic image with a GPU diffusion pipeline.
+5. Click `Download PNG` to export the result.
 
 ## Notes
 
-This project is intentionally dependency-light for reproducible grading. It supports real LLM prompt expansion through Ollama or OpenRouter. If neither provider is configured, the app uses an offline fallback that keeps the same structured output format so the interface remains runnable during grading.
+This project keeps the base app dependency-light for reproducible grading. It supports real LLM prompt expansion through Ollama or OpenRouter. If neither provider is configured, the app uses an offline fallback that keeps the same structured output format. Stable Diffusion is provided as an optional GPU mode because it requires PyTorch, diffusers, and model downloads.

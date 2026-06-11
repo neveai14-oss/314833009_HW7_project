@@ -23,6 +23,7 @@ The selected idea was **Prompt-to-Flow Poster Studio**:
 - The user enters a creative brief.
 - An LLM expands the brief into a structured art direction.
 - A browser Canvas app generates a poster through rectified-flow inspired particle motion.
+- A GPU Stable Diffusion mode can generate semantic text-to-image outputs from the same art direction.
 - The app supports optional Ollama or OpenRouter model calls and an offline fallback.
 
 ## Phase 2: Architecture Design and Task Breakdown
@@ -39,8 +40,10 @@ Define frontend/backend boundaries, API payload format, and demo requirements.
 - Backend: Python standard-library HTTP server.
 - LLM layer: `llm_client.py`, with provider order `Ollama -> OpenRouter -> offline fallback`.
 - API endpoint: `POST /api/expand`.
+- Diffusion endpoint: `POST /api/stable-diffusion`.
 - Frontend: HTML, CSS, and JavaScript Canvas.
 - Generative method: rectified-flow style interpolation from random noise points to deterministic target points.
+- Optional generative model: Stable Diffusion via Hugging Face Diffusers when GPU dependencies are installed.
 
 ### API Format
 
@@ -81,9 +84,10 @@ The frontend should animate a Flow Matching inspired generative image.
 
 - `src/server.py`: serves static files and exposes `/api/expand`.
 - `src/llm_client.py`: implements Ollama, OpenRouter, and fallback prompt expansion.
+- `src/diffusion_client.py`: implements optional Stable Diffusion image generation.
 - `src/index.html`: app shell.
 - `src/styles.css`: responsive interface.
-- `src/app.js`: prompt request, flow particle animation, poster rendering, PNG export.
+- `src/app.js`: prompt request, flow particle animation, optional Stable Diffusion request, poster rendering, PNG export.
 
 ### Technical Issues Resolved by Agent
 
