@@ -1,0 +1,6 @@
+# This project uses only Python standard library modules.
+# No mandatory third-party Python packages are required.
+#
+# Optional runtime integrations:
+# - Ollama local LLM server: set LLM_PROVIDER=ollama and OLLAMA_MODEL.
+# - OpenRouter API: set LLM_PROVIDER=openrouter and OPENROUTER_API_KEY.

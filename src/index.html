@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt-to-Flow Poster Studio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="control-panel">
+      <div>
+        <p class="eyebrow">LLM + Flow Matching</p>
+        <h1>Prompt-to-Flow Poster Studio</h1>
+      </div>
+      <label class="field">
+        <span>Creative brief</span>
+        <textarea id="prompt">台北夜市裡的未來感 AI 音樂祭，霓虹招牌、雨後反光與人群能量</textarea>
+      </label>
+      <div class="toolbar">
+        <button id="generateBtn">Generate</button>
+        <button id="downloadBtn" class="secondary">Download PNG</button>
+      </div>
+      <div class="sliders">
+        <label>Flow steps <input id="steps" type="range" min="40" max="260" value="150"></label>
+        <label>Guidance <input id="guidance" type="range" min="20" max="95" value="68"></label>
+        <label>Particles <input id="particles" type="range" min="900" max="4200" value="2400"></label>
+      </div>
+      <pre id="spec" aria-live="polite"></pre>
+    </section>
+    <section class="stage-panel">
+      <canvas id="poster" width="1200" height="1600"></canvas>
+      <div id="status">Ready</div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
