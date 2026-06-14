@@ -43,7 +43,8 @@ def _from_ollama(user_prompt):
         "stream": False,
         "format": "json",
     }
-    result = _post_json(f"{base_url}/api/chat", payload)
+    timeout = int(os.getenv("OLLAMA_TIMEOUT", "120"))
+    result = _post_json(f"{base_url}/api/chat", payload, timeout=timeout)
     return _extract_json(result["message"]["content"])
 
 

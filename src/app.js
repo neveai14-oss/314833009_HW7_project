@@ -3,11 +3,27 @@ const ctx = canvas.getContext("2d");
 const promptInput = document.getElementById("prompt");
 const specEl = document.getElementById("spec");
 const statusEl = document.getElementById("status");
+const progressOverlay = document.getElementById("progressOverlay");
+const progressTitle = document.getElementById("progressTitle");
+const progressDetail = document.getElementById("progressDetail");
 const generateBtn = document.getElementById("generateBtn");
 const stableBtn = document.getElementById("stableBtn");
+const sdMode = document.getElementById("sdMode");
 const downloadBtn = document.getElementById("downloadBtn");
+const saveAssetBtn = document.getElementById("saveAssetBtn");
+const flowControls = document.getElementById("flowControls");
 
 let animationId = null;
+let stableDiffusionAvailable = false;
+let stableDiffusionReason = "Checking Stable Diffusion dependencies...";
+
+function setStatus(message, options = {}) {
+  const { busy = false, title = message, detail = "" } = options;
+  statusEl.textContent = message;
+  progressTitle.textContent = title;
+  progressDetail.textContent = detail || message;
+  progressOverlay.classList.toggle("hidden", !busy);
+}
 
 function hashString(text) {
   let h = 2166136261;
@@ -186,6 +202,28 @@ function wrapText(text, x, y, maxWidth, lineHeight) {
   if (line) ctx.fillText(line, x, y);
 }
 
+async function loadCapabilities() {
+  try {
+    const response = await fetch("/api/capabilities");
+    if (!response.ok) throw new Error(await response.text());
+    const data = await response.json();
+    const status = data.stable_diffusion || {};
+    stableDiffusionAvailable = Boolean(status.available);
+    stableDiffusionReason = status.reason || "Stable Diffusion is unavailable in this environment.";
+    stableBtn.disabled = !stableDiffusionAvailable;
+    stableBtn.title = stableDiffusionAvailable
+      ? "Stable Diffusion ready: " + (status.model || "configured model")
+      : stableDiffusionReason;
+    stableBtn.textContent = stableDiffusionAvailable ? "Generate SD Image" : "SD Unavailable";
+  } catch (error) {
+    stableDiffusionAvailable = false;
+    stableDiffusionReason = "Stable Diffusion capability check failed: " + error.message;
+    stableBtn.disabled = true;
+    stableBtn.title = stableDiffusionReason;
+    stableBtn.textContent = "SD Unavailable";
+  }
+}
+
 async function expandPrompt(prompt) {
   const response = await fetch("/api/expand", {
     method: "POST",
@@ -196,22 +234,91 @@ async function expandPrompt(prompt) {
   return response.json();
 }
 
+function freePromptEnglishHints(text) {
+  const hints = [];
+  const pairs = [
+    [/森林|樹林/, "forest"],
+    [/龍|龙/, "dragon, full dragon body, wings or serpentine dragon silhouette"],
+    [/月光|月亮/, "moonlight, moonlit atmosphere"],
+    [/巨樹|大樹/, "giant ancient trees"],
+    [/霧|霧氣|雾/, "mist, fog, atmospheric haze"],
+    [/電影感/, "cinematic composition"],
+    [/海底/, "underwater"],
+    [/城市/, "city"],
+    [/太空/, "space, sci-fi"],
+  ];
+  for (const [pattern, hint] of pairs) {
+    if (pattern.test(text)) hints.push(hint);
+  }
+  return hints.join(", ");
+}
+
 async function generateStableDiffusionImage(spec) {
+  const userBrief = promptInput.value.trim();
+  const objectHints = Array.isArray(spec.objects) ? spec.objects.join(", ") : "";
+  const mood = spec.mood || "cinematic, detailed, coherent";
+  const isProjectMode = sdMode.value === "project";
+  const freeHints = freePromptEnglishHints(userBrief);
+  const sdPrompt = isProjectMode
+    ? [
+        "masterpiece, high quality, cinematic vertical wide angle environmental concept art, SDXL detailed scene",
+        "PRIMARY SUBJECT: a futuristic AI music festival stage built inside a narrow Taipei night market street, stage clearly visible at the vanishing point",
+        "visible DJ booth on the stage, huge LED main screen behind it, speaker stacks, lighting truss, holographic AI face visuals, laser beams over the crowd",
+        "crowd viewed from behind, people standing in the wet night market street and facing the stage, concert audience behavior, hands raised, festival energy",
+        "narrow Taipei night market street after heavy rain, intimate street-level perspective, not a stadium, not a plaza, not an aerial view",
+        "wet reflective asphalt road with mirror-like neon reflections across the entire street",
+        "food stalls, awnings, scooters, steam, umbrellas, and dense glowing neon light panels on both sides of the street",
+        "small but unmistakable AI concert stage integrated into the market stalls, LED screen and lasers must be visible",
+        "Taipei 101 visible in the distant background above the street, Taiwan night market atmosphere",
+        "cyberpunk blue magenta green lighting, rain mist, cinematic depth, realistic scale, rich street details",
+        "strong composition: narrow street perspective lines lead directly to the stage, stage is the focal point",
+        "no readable text, no poster typography, signs are abstract glowing shapes only",
+        userBrief,
+        objectHints,
+      ].filter(Boolean).join(", ")
+    : [
+        "masterpiece, high quality, SDXL detailed image, coherent scene, strong composition",
+        "FOLLOW THE USER PROMPT LITERALLY. The main subject must be clearly visible in the image.",
+        userBrief,
+        freeHints ? "English semantic hints: " + freeHints : "",
+        objectHints ? "key visual elements from the prompt: " + objectHints : "",
+        "visual mood: " + mood,
+        "cinematic lighting, clear subject, detailed environment, balanced foreground and background",
+        "if the prompt mentions a creature or object, show that creature or object clearly, not only the environment",
+        "no readable text, no poster typography, no watermark",
+      ].filter(Boolean).join(", ");
+  const negativePrompt = isProjectMode
+    ? "ordinary street only, no concert, no stage, no DJ booth, no LED screen, no speaker stacks, no lasers, no crowd facing stage, stadium, huge plaza, aerial view, empty street, single main character, portrait, close up person, selfie, hero pose, solo singer closeup, performer closeup, readable text, Chinese characters, English words, fake text, gibberish text, broken letters, poster title, typography, captions, subtitles, watermark, logo, abstract pattern, geometric web, lattice, mandala, dry road, daylight, low quality, blurry, distorted faces"
+    : "missing main subject, subject not visible, only background, temple, pagoda, palace, shrine, large building, architecture focus, readable text, fake text, gibberish text, broken letters, poster title, typography, captions, subtitles, watermark, logo, low quality, blurry, distorted anatomy, distorted faces, duplicate limbs, messy composition";
   const response = await fetch("/api/stable-diffusion", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      prompt: `${spec.prompt || promptInput.value}. poster design, cinematic composition, high quality, detailed, clean layout`,
-      negative_prompt: "low quality, blurry, watermark, unreadable text, distorted typography",
-      width: 512,
-      height: 768,
-      steps: 25,
-      guidance: 7.5,
+      prompt: sdPrompt,
+      negative_prompt: negativePrompt,
+      width: 768,
+      height: 1024,
+      steps: 35,
+      guidance: isProjectMode ? 7.5 : 7.0,
     }),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Stable Diffusion request failed.");
   return data;
+}
+
+function cleanPosterTitle(text) {
+  const title = String(text || "Stable Diffusion Poster")
+    .replace(/，.*$/, "")
+    .replace(/、.*$/, "")
+    .replace(/\bAi\b/g, "AI")
+    .trim();
+  if (!title) return "Stable Diffusion Poster";
+
+  const limit = sdMode.value === "free" ? 38 : 28;
+  const chars = Array.from(title);
+  if (chars.length <= limit) return title;
+  return chars.slice(0, limit).join("") + "...";
 }
 
 function drawStableImage(data, spec) {
@@ -221,22 +328,22 @@ function drawStableImage(data, spec) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "rgba(2, 6, 23, .64)";
-    ctx.fillRect(60, 80, 1080, 180);
+    ctx.fillStyle = "rgba(2, 6, 23, .52)";
+    ctx.fillRect(60, 88, 1080, 132);
     ctx.fillStyle = "#f8fafc";
-    ctx.font = '800 52px "Microsoft JhengHei", Inter, Arial, sans-serif';
+    ctx.font = '800 44px "Microsoft JhengHei", Inter, Arial, sans-serif';
     ctx.textBaseline = "top";
-    wrapText(spec.title || "Stable Diffusion Poster", 92, 110, 980, 62);
-    ctx.fillStyle = "rgba(248,250,252,.78)";
-    ctx.font = "24px Inter, Arial, sans-serif";
-    ctx.fillText(`Stable Diffusion · ${data.model} · seed ${data.seed}`, 92, 220);
-    statusEl.textContent = "Done · Stable Diffusion image";
+    wrapText(cleanPosterTitle(promptInput.value || spec.title), 92, 112, 980, 52);
+    ctx.fillStyle = "rgba(248,250,252,.72)";
+    ctx.font = "20px Inter, Arial, sans-serif";
+    ctx.fillText(`Stable Diffusion · ${data.model} · seed ${data.seed}`, 92, 184);
+    setStatus("Done · Stable Diffusion image");
   };
   image.src = data.image;
 }
 
 async function generate() {
-  statusEl.textContent = "Expanding prompt with LLM client...";
+  setStatus("Generating Flow Matching poster...", { busy: true, title: "Generating Flow Poster", detail: "Drawing the browser canvas particle poster. This is different from Stable Diffusion." });
   generateBtn.disabled = true;
   try {
     const spec = await expandPrompt(promptInput.value);
@@ -248,37 +355,43 @@ async function generate() {
       frame += 1;
       const progress = frame / totalSteps;
       drawPoster(spec, progress);
-      statusEl.textContent = `Flow matching denoising step ${Math.min(frame, totalSteps)} / ${totalSteps}`;
+      setStatus(`Flow matching denoising step ${Math.min(frame, totalSteps)} / ${totalSteps}`, { busy: true, title: "Generating Flow Poster", detail: `Denoising step ${Math.min(frame, totalSteps)} / ${totalSteps}` });
       if (frame < totalSteps) {
         animationId = requestAnimationFrame(tick);
       } else {
-        statusEl.textContent = spec.provider_errors?.length
+        setStatus(spec.provider_errors?.length
           ? "Done · LLM source: offline fallback"
-          : `Done · LLM source: ${spec.source || "api"}`;
+          : `Done · LLM source: ${spec.source || "api"}`);
       }
     }
     tick();
   } catch (error) {
-    statusEl.textContent = `Error: ${error.message}`;
+    setStatus(`Error: ${error.message}`);
   } finally {
     generateBtn.disabled = false;
   }
 }
 
 async function generateStable() {
-  statusEl.textContent = "Expanding prompt, then running Stable Diffusion...";
+  if (!stableDiffusionAvailable) {
+    setStatus("Stable Diffusion unavailable · " + stableDiffusionReason);
+    return;
+  }
+  setStatus("Running Stable Diffusion image generation...", { busy: true, title: "Generating SD Image", detail: "Running the GPU text-to-image model. This output will differ from the Flow Matching poster." });
   generateBtn.disabled = true;
   stableBtn.disabled = true;
+  flowControls.disabled = true;
   try {
     const spec = await expandPrompt(promptInput.value);
     specEl.textContent = JSON.stringify(visibleSpec(spec), null, 2);
     const data = await generateStableDiffusionImage(spec);
     drawStableImage(data, spec);
   } catch (error) {
-    statusEl.textContent = `Stable Diffusion error: ${error.message}`;
+    setStatus(`Stable Diffusion error: ${error.message}`);
   } finally {
     generateBtn.disabled = false;
     stableBtn.disabled = false;
+    flowControls.disabled = false;
   }
 }
 
@@ -287,6 +400,24 @@ downloadBtn.addEventListener("click", () => {
   link.download = "314833009_HW7_poster.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
+});
+
+saveAssetBtn.addEventListener("click", async () => {
+  saveAssetBtn.disabled = true;
+  try {
+    const response = await fetch("/api/save-demo-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: canvas.toDataURL("image/png") }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Save failed.");
+    setStatus("Saved current canvas to assets/314833009_HW7.png");
+  } catch (error) {
+    setStatus("Save demo asset error: " + error.message);
+  } finally {
+    saveAssetBtn.disabled = false;
+  }
 });
 
 generateBtn.addEventListener("click", generate);
@@ -303,5 +434,6 @@ const defaultSpec = {
 };
 
 specEl.textContent = JSON.stringify(visibleSpec(defaultSpec), null, 2);
-statusEl.textContent = "Done · LLM source: offline_fallback";
+setStatus("Done · LLM source: offline_fallback");
 drawPoster(defaultSpec);
+loadCapabilities();

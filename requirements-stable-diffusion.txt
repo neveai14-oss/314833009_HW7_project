@@ -1,11 +1,30 @@
-# Optional GPU mode dependencies.
-# Install PyTorch with the CUDA build that matches your GPU/driver first:
-# https://pytorch.org/get-started/locally/
+# Optional Stable Diffusion XL GPU dependencies
+# --------------------------------------------
+# Install these only if you want to use the Generate SD Image button.
+# The base Flow Matching mode does not need these packages.
 #
-# Example for CUDA 12.1:
-# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# Recommended order:
+# 1. Install a CUDA-enabled PyTorch build that matches your GPU/driver.
+#    See: https://pytorch.org/get-started/locally/
+#
+#    Example only, choose the command that matches your CUDA version:
+#    pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#
+# 2. Install this file from the project folder:
+#    python -m pip install -r requirements-stable-diffusion.txt
+#
+# 3. Start the server with the same Python environment that installed these packages.
+#    For example, after activating your venv/conda environment:
+#    python src/server.py
+#
+# Note: /workspace/env01/bin/python was only the tested interpreter path in one
+# container. Other machines should use their own project environment path.
+#
+# The current default image model is:
+#   stabilityai/stable-diffusion-xl-base-1.0
+# You can override it by setting SD_MODEL_ID before starting the server.
 
-diffusers>=0.30.0
+diffusers>=0.38.0
 transformers>=4.44.0
 accelerate>=0.33.0
 safetensors>=0.4.4

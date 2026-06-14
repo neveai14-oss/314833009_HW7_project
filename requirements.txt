@@ -1,7 +1,11 @@
-# This project uses only Python standard library modules.
-# No mandatory third-party Python packages are required.
+# Base app requirements
+# ---------------------
+# The default Flow Matching demo uses only Python standard library modules.
+# No mandatory third-party package is required to run:
 #
-# Optional runtime integrations:
-# - Ollama local LLM server: set LLM_PROVIDER=ollama and OLLAMA_MODEL.
-# - OpenRouter API: set LLM_PROVIDER=openrouter and OPENROUTER_API_KEY.
-# - Stable Diffusion GPU mode: install requirements-stable-diffusion.txt.
+#   python src/server.py
+#
+# Optional integrations:
+# - Ollama: install and run the Ollama desktop/server app separately.
+# - OpenRouter: set OPENROUTER_API_KEY in the environment.
+# - Stable Diffusion XL GPU mode: install requirements-stable-diffusion.txt.

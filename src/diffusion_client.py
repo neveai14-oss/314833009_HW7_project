@@ -1,4 +1,5 @@
 import base64
+import importlib.util
 import io
 import os
 import random
@@ -8,10 +9,30 @@ PIPELINE = None
 PIPELINE_MODEL = None
 
 
+def stable_diffusion_status():
+    missing = [
+        name
+        for name in ("torch", "diffusers", "PIL")
+        if importlib.util.find_spec(name) is None
+    ]
+    if missing:
+        return {
+            "available": False,
+            "reason": (
+                "Stable Diffusion optional GPU dependencies are not installed: "
+                + ", ".join(missing)
+            ),
+        }
+    return {
+        "available": True,
+        "model": os.getenv("SD_MODEL_ID", "stabilityai/stable-diffusion-xl-base-1.0"),
+    }
+
+
 def _load_pipeline(model_id):
     try:
         import torch
-        from diffusers import StableDiffusionPipeline
+        from diffusers import AutoPipelineForText2Image
     except ImportError as exc:
         raise RuntimeError(
             "Stable Diffusion dependencies are not installed. "
@@ -20,21 +41,21 @@ def _load_pipeline(model_id):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch.float16 if device == "cuda" else torch.float32
-    pipe = StableDiffusionPipeline.from_pretrained(
+    pipe = AutoPipelineForText2Image.from_pretrained(
         model_id,
         torch_dtype=dtype,
-        safety_checker=None,
-        requires_safety_checker=False,
+        use_safetensors=True,
     )
     pipe = pipe.to(device)
-    pipe.enable_attention_slicing()
+    if hasattr(pipe, "enable_attention_slicing"):
+        pipe.enable_attention_slicing()
     return pipe
 
 
 def generate_stable_diffusion_image(prompt, negative_prompt="", width=512, height=768, steps=25, guidance=7.5, seed=None):
     global PIPELINE, PIPELINE_MODEL
 
-    model_id = os.getenv("SD_MODEL_ID", "runwayml/stable-diffusion-v1-5")
+    model_id = os.getenv("SD_MODEL_ID", "stabilityai/stable-diffusion-xl-base-1.0")
     if PIPELINE is None or PIPELINE_MODEL != model_id:
         PIPELINE = _load_pipeline(model_id)
         PIPELINE_MODEL = model_id

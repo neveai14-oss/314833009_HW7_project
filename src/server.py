@@ -1,16 +1,18 @@
+import base64
 import json
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 try:
     from .llm_client import expand_prompt
-    from .diffusion_client import generate_stable_diffusion_image
+    from .diffusion_client import generate_stable_diffusion_image, stable_diffusion_status
 except ImportError:
     from llm_client import expand_prompt
-    from diffusion_client import generate_stable_diffusion_image
+    from diffusion_client import generate_stable_diffusion_image, stable_diffusion_status
 
 
 ROOT = Path(__file__).resolve().parent
+ASSET_PATH = ROOT.parent / "assets" / "314833009_HW7.png"
 
 
 class AppHandler(SimpleHTTPRequestHandler):
@@ -23,12 +25,21 @@ class AppHandler(SimpleHTTPRequestHandler):
         self.send_header("Expires", "0")
         super().end_headers()
 
+    def do_GET(self):
+        if self.path == "/api/capabilities":
+            self._send_json({"stable_diffusion": stable_diffusion_status()})
+            return
+        super().do_GET()
+
     def do_POST(self):
         if self.path == "/api/expand":
             self._handle_expand()
             return
         if self.path == "/api/stable-diffusion":
             self._handle_stable_diffusion()
+            return
+        if self.path == "/api/save-demo-image":
+            self._handle_save_demo_image()
             return
         self.send_error(404)
 
@@ -40,6 +51,26 @@ class AppHandler(SimpleHTTPRequestHandler):
             self._send_json({"error": "Prompt is required."}, status=400)
             return
         self._send_json(expand_prompt(prompt))
+
+    def _handle_save_demo_image(self):
+        length = int(self.headers.get("Content-Length", "0"))
+        payload = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
+        image = payload.get("image", "")
+        prefix = "data:image/png;base64,"
+        if not image.startswith(prefix):
+            self._send_json({"error": "PNG data URL is required."}, status=400)
+            return
+        try:
+            raw = base64.b64decode(image[len(prefix):], validate=True)
+        except Exception:
+            self._send_json({"error": "Invalid base64 image data."}, status=400)
+            return
+        if not raw.startswith(b"\x89PNG\r\n\x1a\n"):
+            self._send_json({"error": "Only PNG images can be saved."}, status=400)
+            return
+        ASSET_PATH.parent.mkdir(parents=True, exist_ok=True)
+        ASSET_PATH.write_bytes(raw)
+        self._send_json({"saved": True, "path": str(ASSET_PATH), "bytes": len(raw)})
 
     def _handle_stable_diffusion(self):
         length = int(self.headers.get("Content-Length", "0"))

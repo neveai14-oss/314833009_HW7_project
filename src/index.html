@@ -15,22 +15,45 @@
       </div>
       <label class="field">
         <span>Creative brief</span>
-        <textarea id="prompt">台北夜市裡的未來感 AI 音樂祭，霓虹招牌、雨後反光與人群能量</textarea>
+        <textarea id="prompt">台北夜市裡的未來感 AI 視覺音樂祭</textarea>
       </label>
-      <div class="toolbar">
-        <button id="generateBtn">Generate</button>
-        <button id="stableBtn" class="secondary">Stable Diffusion</button>
-        <button id="downloadBtn" class="secondary">Download PNG</button>
+      <div class="toolbar" aria-label="Image generation modes">
+        <div class="mode-action">
+          <span>Flow Matching</span>
+          <button id="generateBtn">Generate Flow Poster</button>
+        </div>
+        <div class="mode-action">
+          <span>Stable Diffusion</span>
+          <select id="sdMode" class="mode-select" aria-label="Stable Diffusion prompt mode">
+            <option value="project">Project Theme</option>
+            <option value="free">Free Prompt</option>
+          </select>
+          <button id="stableBtn" class="secondary">Generate SD Image</button>
+        </div>
       </div>
-      <div class="sliders">
-        <label>Flow steps <input id="steps" type="range" min="40" max="260" value="150"></label>
-        <label>Guidance <input id="guidance" type="range" min="20" max="95" value="68"></label>
-        <label>Particles <input id="particles" type="range" min="900" max="4200" value="2400"></label>
+      <div class="asset-actions">
+        <button id="downloadBtn" class="download-action">Download Current Image</button>
+        <button id="saveAssetBtn" class="secondary">Update Demo Asset</button>
       </div>
+      <details class="flow-details">
+        <summary>Advanced Flow Matching Controls</summary>
+        <fieldset id="flowControls" class="sliders">
+          <label>Flow steps <input id="steps" type="range" min="40" max="260" value="150"></label>
+          <label>Guidance <input id="guidance" type="range" min="20" max="95" value="68"></label>
+          <label>Particles <input id="particles" type="range" min="900" max="4200" value="2400"></label>
+        </fieldset>
+      </details>
       <pre id="spec" aria-live="polite"></pre>
     </section>
     <section class="stage-panel">
       <canvas id="poster" width="1200" height="1600"></canvas>
+      <div id="progressOverlay" class="progress-overlay hidden" aria-live="polite" role="status">
+        <div class="spinner" aria-hidden="true"></div>
+        <div>
+          <p id="progressTitle">Working</p>
+          <span id="progressDetail">Please wait</span>
+        </div>
+      </div>
       <div id="status">Ready</div>
     </section>
   </main>
