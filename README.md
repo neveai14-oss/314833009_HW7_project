@@ -19,8 +19,6 @@ The current demonstration material included in this GitHub repository is:
 assets/314833009_HW7.png  # App operation screenshot
 ```
 
-The operation recording `assets/314833009_HW7.mp4` is kept out of GitHub because the file is larger than GitHub's single-file upload limit. If a video is required, submit it separately through the course platform or an external link.
-
 ## System Architecture
 
 - Frontend: `src/index.html`, `src/styles.css`, and `src/app.js` provide the browser interface, Canvas Flow Matching poster renderer, prompt mode selector, download action, and demo-asset save action.
@@ -290,7 +288,7 @@ Generated image examples. These show one `Project Theme` result and two `Free Pr
 - Dependency files are included as `requirements.txt` and `requirements-stable-diffusion.txt`.
 - Project documentation is included in this `README.md`.
 - Agent workflow documentation is included in `docs/WORKFLOW_LOG.md`.
-- The demonstration screenshot is included in `assets/314833009_HW7.png`. The operation recording is not tracked in GitHub because it exceeds the file-size limit.
+- The demonstration screenshot is included in `assets/314833009_HW7.png`.
 - After publishing the GitHub repository, put the public repository link in `314833009_HW7.txt` for submission.
 
 ## Notes
