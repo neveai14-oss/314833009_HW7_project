@@ -124,7 +124,6 @@ Write README instructions, workflow log, and produce demonstration material.
 - README: `README.md`
 - Workflow log: `docs/WORKFLOW_LOG.md`
 - Demonstration screenshot: `assets/314833009_HW7.png`
-- Operation recording: `assets/314833009_HW7.mp4`
 - Generated examples:
   - `assets/example_project_theme_ai_visual_music_festival.png`
   - `assets/example_free_prompt_forest_dragon.png`
@@ -136,7 +135,7 @@ Write README instructions, workflow log, and produce demonstration material.
 - Prompt Engineering: `src/app.js` contains Project Theme and Free Prompt templates for Stable Diffusion XL.
 - Diffusion / Flow Matching: the app includes both a browser Flow Matching style particle poster and optional Stable Diffusion XL image generation.
 - App Interface: `src/index.html`, `src/styles.css`, and `src/app.js` provide the interactive local app.
-- Submission Materials: README, workflow log, source code, requirements, screenshot, operation recording, and generated examples are all included in the project folder.
+- Submission Materials: README, workflow log, source code, requirements, screenshot, and generated examples are all included in the project folder.
 
 ## Reflection
 
