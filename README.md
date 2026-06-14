@@ -13,12 +13,13 @@ Recommended final prompt:
 台北夜市裡的未來感 AI 視覺音樂祭
 ```
 
-The current demonstration materials are:
+The current demonstration material included in this GitHub repository is:
 
 ```text
 assets/314833009_HW7.png  # App operation screenshot
-assets/314833009_HW7.mp4  # App operation recording
 ```
+
+The operation recording `assets/314833009_HW7.mp4` is kept out of GitHub because the file is larger than GitHub's single-file upload limit. If a video is required, submit it separately through the course platform or an external link.
 
 ## System Architecture
 
@@ -243,12 +244,6 @@ assets/314833009_HW7.png
 Main demonstration screenshot. It shows the app running in the browser, the prompt, `Project Theme`, the JSON art direction panel, and the generated SDXL image.
 
 ```text
-assets/314833009_HW7.mp4
-```
-
-App operation recording. It demonstrates the local interface and generation workflow.
-
-```text
 assets/example_project_theme_ai_visual_music_festival.png
 assets/example_free_prompt_forest_dragon.png
 assets/example_free_prompt_underwater_city.png
@@ -274,7 +269,6 @@ Generated image examples. These show one `Project Theme` result and two `Free Pr
     WORKFLOW_LOG.md
   assets/
     314833009_HW7.png
-    314833009_HW7.mp4
     example_project_theme_ai_visual_music_festival.png
     example_free_prompt_forest_dragon.png
     example_free_prompt_underwater_city.png
@@ -296,7 +290,7 @@ Generated image examples. These show one `Project Theme` result and two `Free Pr
 - Dependency files are included as `requirements.txt` and `requirements-stable-diffusion.txt`.
 - Project documentation is included in this `README.md`.
 - Agent workflow documentation is included in `docs/WORKFLOW_LOG.md`.
-- Demonstration materials are included in `assets/314833009_HW7.png` and `assets/314833009_HW7.mp4`.
+- The demonstration screenshot is included in `assets/314833009_HW7.png`. The operation recording is not tracked in GitHub because it exceeds the file-size limit.
 - After publishing the GitHub repository, put the public repository link in `314833009_HW7.txt` for submission.
 
 ## Notes
