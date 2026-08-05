@@ -34,7 +34,7 @@ assets/314833009_HW7.png  # App operation screenshot
 This mode does not require extra Python packages.
 
 ```bash
-cd 314833009_HW7_project
+cd prompt-to-flow-poster-studio
 python src/server.py
 ```
 
@@ -53,7 +53,7 @@ This mode needs a GPU environment plus the optional packages in `requirements-st
 Use the same Python environment for installing packages and starting the server:
 
 ```bash
-cd 314833009_HW7_project
+cd prompt-to-flow-poster-studio
 python -m pip install -r requirements-stable-diffusion.txt
 python src/server.py
 ```
@@ -185,7 +185,7 @@ Keep Terminal 1 open. Then use another terminal to enter the project folder, pul
 Linux / macOS / zsh / bash:
 
 ```bash
-cd /workspace/314833009_HW7_project
+cd /workspace/prompt-to-flow-poster-studio
 ollama pull llama3.1  # only needed the first time
 export LLM_PROVIDER="ollama"
 export OLLAMA_MODEL="llama3.1"
@@ -195,7 +195,7 @@ python src/server.py
 If you are using the provided container environment, start the server with the tested Python interpreter:
 
 ```bash
-cd /workspace/314833009_HW7_project
+cd /workspace/prompt-to-flow-poster-studio
 export LLM_PROVIDER="ollama"
 export OLLAMA_MODEL="llama3.1"
 /workspace/env01/bin/python src/server.py
@@ -204,7 +204,7 @@ export OLLAMA_MODEL="llama3.1"
 PowerShell:
 
 ```powershell
-cd .\314833009_HW7_project
+cd .\prompt-to-flow-poster-studio
 ollama pull llama3.1  # only needed the first time
 $env:LLM_PROVIDER="ollama"
 $env:OLLAMA_MODEL="llama3.1"
@@ -252,7 +252,7 @@ Generated image examples. These show one `Project Theme` result and two `Free Pr
 ## Project Structure
 
 ```text
-314833009_HW7_project/
+prompt-to-flow-poster-studio/
   README.md
   requirements.txt
   requirements-stable-diffusion.txt
